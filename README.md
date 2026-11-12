@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Freshers 2026 – Complete Registration & Management System
 
-## Getting Started
+**Jayawantrao Sawant College of Engineering**
 
-First, run the development server:
+A complete, production-ready full-stack web application for student registration, Razorpay payment processing, QR ticket generation, and secure event entry management.
+
+---
+
+## 🚀 Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes (server-side)
+- **Database**: Supabase PostgreSQL + Supabase Auth
+- **Payment**: Razorpay Standard Checkout
+- **Email**: Resend API
+- **QR**: qrcode + html5-qrcode
+- **Hosting**: Vercel
+
+---
+
+## 📋 Features
+
+- ✅ Student registration with duplicate prevention
+- ✅ Razorpay Standard Checkout (UPI, Cards, Net Banking)
+- ✅ Payment signature verification (server-side)
+- ✅ Razorpay webhooks with idempotency
+- ✅ Cryptographically secure QR entry tickets
+- ✅ PDF invoice generation (HTML-based, downloadable)
+- ✅ Automated confirmation emails via Resend
+- ✅ 3 Admin accounts via Supabase Auth
+- ✅ Admin dashboard with live stats and charts
+- ✅ QR scanner with camera support
+- ✅ Atomic entry validation (prevents duplicate entry)
+- ✅ Dynamic event settings (date/venue live updates)
+- ✅ CSV export
+- ✅ Full RLS on Supabase
+- ✅ Mobile-responsive premium dark design
+
+---
+
+## 🛠️ Setup Guide
+
+### 1. Clone & Install
+
+```bash
+git clone <your-repo-url>
+cd freshers-2026
+npm install
+```
+
+### 2. Environment Variables
+
+```bash
+cp .env.example .env.local
+```
+
+Fill in all values in `.env.local`. See `.env.example` for reference.
+
+### 3. Supabase Setup
+
+1. Create project at [supabase.com](https://supabase.com)
+2. Run SQL migration: **SQL Editor** → paste contents of `supabase/migrations/001_initial_schema.sql`
+3. Enable Email auth in Authentication settings
+
+### 4. Create Admin Accounts (3 required)
+
+Go to **Supabase Dashboard → Authentication → Users → Add User** for each admin.
+
+Then run in SQL Editor (replace UUIDs with actual auth user IDs):
+
+```sql
+INSERT INTO admin_profiles (auth_user_id, name, role) VALUES
+  ('uuid-of-admin-1', 'Admin One Name', 'super_admin'),
+  ('uuid-of-admin-2', 'Admin Two Name', 'admin'),
+  ('uuid-of-admin-3', 'Admin Three Name', 'admin');
+```
+
+### 5. Razorpay Setup
+
+1. Account at [razorpay.com](https://razorpay.com)
+2. Generate Test API Keys → add to `.env.local`
+3. Configure Webhook: `https://your-domain.com/api/payment/webhook`
+   - Events: `payment.captured`, `payment.failed`, `refund.processed`
+
+### 6. Resend Email Setup
+
+1. Account at [resend.com](https://resend.com)
+2. Verify your domain → create API key
+3. Add to `.env.local`
+
+### 7. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Open http://localhost:3000
+# Admin: http://localhost:3000/admin/login
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Production Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Push to GitHub
+# Import in vercel.com
+# Add all environment variables in Vercel settings
+# Deploy
+npm run build  # Test build locally first
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🔒 Security
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Razorpay secret key never exposed to browser
+- Payment signature verified server-side
+- Webhook signature verified via HMAC-SHA256
+- QR tokens are cryptographically random (256-bit), only SHA-256 hash stored
+- Student data never embedded in QR code
+- Supabase service role key never sent to browser
+- Row Level Security enabled on all tables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧪 Test Cards (Razorpay Test Mode)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Card**: `4111 1111 1111 1111`, any future date, any CVV
+- **UPI**: Any test UPI ID
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Built for JSCE Freshers 2026.

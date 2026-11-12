@@ -1,0 +1,101 @@
+'use client';
+
+import { useState } from 'react';
+import { ChevronDown, HelpCircle } from 'lucide-react';
+
+const faqs = [
+  {
+    q: 'Who can register for Freshers 2026?',
+    a: 'All first-year students from any of the six departments at Jayawantrao Sawant College of Engineering can register.',
+  },
+  {
+    q: 'What is the registration fee?',
+    a: 'The registration fee is ₹300 per student. This covers your entry ticket and all event activities.',
+  },
+  {
+    q: 'What payment methods are accepted?',
+    a: 'We accept UPI (Google Pay, PhonePe, Paytm, BHIM), Debit Cards, Credit Cards, and Net Banking via our secure Razorpay payment gateway.',
+  },
+  {
+    q: 'What happens after I pay?',
+    a: 'After successful payment, you will receive a confirmation email with your PDF invoice and QR entry ticket attached. You can also download them directly from the success page.',
+  },
+  {
+    q: 'How do I use the QR ticket at the event?',
+    a: 'Show your QR ticket (printed or on your phone) at the entry gate. Our team will scan it using a camera. Each QR code is valid for one entry only.',
+  },
+  {
+    q: 'What if my payment fails?',
+    a: 'If your payment fails, your money will not be deducted (or will be refunded if deducted). You can try again from the same registration without filling the form again.',
+  },
+  {
+    q: 'What is the event date and venue?',
+    a: 'The event date and venue are TBA (To Be Announced). They will be updated on this website and communicated via email once confirmed.',
+  },
+  {
+    q: 'Can I register on behalf of someone else?',
+    a: 'No. Each student must register with their own College ID/PRN. Each College ID can only have one valid registration.',
+  },
+  {
+    q: 'What if I cannot attend after paying?',
+    a: 'The registration fee is non-refundable unless the event is cancelled. If the event is cancelled, refunds will be processed automatically.',
+  },
+  {
+    q: 'I did not receive my email. What do I do?',
+    a: 'Check your spam/junk folder. If you still cannot find it, contact the event coordinators with your Registration ID and College ID.',
+  },
+  {
+    q: 'Is there a deadline for registration?',
+    a: 'Registration closes either when all 1000 seats are filled or when registration is officially closed by the organizers. Register early to avoid missing out!',
+  },
+];
+
+export default function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <section id="faqs" className="py-24 relative">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-yellow-900/30 border border-yellow-700/30 px-4 py-2 rounded-full mb-6">
+            <HelpCircle className="w-4 h-4 text-yellow-400" />
+            <span className="text-yellow-300 text-sm font-medium">Frequently Asked Questions</span>
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-black text-white mb-4">
+            Got <span className="gradient-text">Questions?</span>
+          </h2>
+          <p className="text-slate-400">Everything you need to know about Freshers 2026.</p>
+        </div>
+
+        <div className="space-y-3">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="glass rounded-2xl overflow-hidden border border-purple-900/30 hover:border-purple-700/50 transition-colors"
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full flex items-center justify-between p-5 text-left"
+              >
+                <span className="text-white font-medium pr-4">{faq.q}</span>
+                <ChevronDown
+                  className={`w-5 h-5 text-purple-400 flex-shrink-0 transition-transform duration-200 ${
+                    openIndex === index ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {openIndex === index && (
+                <div className="px-5 pb-5">
+                  <p className="text-slate-400 text-sm leading-relaxed border-t border-purple-900/30 pt-4">
+                    {faq.a}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
