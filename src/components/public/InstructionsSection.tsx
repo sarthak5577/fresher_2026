@@ -1,4 +1,4 @@
-import { UserPlus, CreditCard, QrCode, DoorOpen, ArrowRight } from 'lucide-react';
+import { UserPlus, Smartphone, CheckCircle2, DoorOpen, ArrowRight } from 'lucide-react';
 
 export default function InstructionsSection() {
   const steps = [
@@ -11,23 +11,23 @@ export default function InstructionsSection() {
     },
     {
       step: '02',
-      icon: CreditCard,
-      title: 'Complete Payment',
-      desc: 'Pay ₹300 securely via Razorpay using UPI (Google Pay, PhonePe), debit/credit card or netbanking.',
+      icon: Smartphone,
+      title: 'Scan & Pay via UPI',
+      desc: 'Scan the dynamic UPI QR code or pay directly with GPay, PhonePe, or Paytm (₹300, 0% fee).',
       color: 'from-blue-600 to-blue-800',
     },
     {
       step: '03',
-      icon: QrCode,
-      title: 'Receive QR Ticket',
-      desc: 'Get your unique QR entry ticket and PDF invoice instantly via email and direct download.',
+      icon: CheckCircle2,
+      title: 'Enter UTR & Get Ticket',
+      desc: 'Enter your 12-digit transaction UTR for instant automated verification and immediate ticket generation.',
       color: 'from-purple-600 to-blue-700',
     },
     {
       step: '04',
       icon: DoorOpen,
       title: 'Enter the Event',
-      desc: 'Show your QR code at the entry gate. It will be scanned once to grant you access.',
+      desc: 'Show your unique QR code at the college auditorium gate for fast one-tap entry verification.',
       color: 'from-green-600 to-teal-700',
     },
   ];

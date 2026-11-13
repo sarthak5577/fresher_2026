@@ -41,7 +41,6 @@ export default function Footer({ settings }: FooterProps) {
               {[
                 { label: 'Home', href: '#home' },
                 { label: 'About Event', href: '#about' },
-                { label: 'Event Details', href: '#event-details' },
                 { label: 'Register', href: '#register' },
                 { label: 'FAQs', href: '#faqs' },
               ].map((link) => (

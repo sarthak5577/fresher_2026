@@ -124,8 +124,8 @@ export default function VerifyPaymentsPage() {
       <div className="bg-blue-900/20 border border-blue-700/30 rounded-xl p-4">
         <h3 className="text-blue-300 font-semibold text-sm mb-2">📋 Verification Process</h3>
         <ol className="text-slate-400 text-xs space-y-1 list-decimal list-inside">
-          <li>Student shows UPI payment screenshot to you (WhatsApp/in-person)</li>
-          <li>Check UTR number in your Paytm Business app → verify ₹300 received</li>
+          <li>Student shows UPI payment screenshot or UTR number</li>
+          <li>Check ₹300 received on your UPI app (PhonePe / GPay / Paytm)</li>
           <li>Enter the UTR number in the field below (optional but recommended)</li>
           <li>Click <strong className="text-green-400">Approve</strong> → system auto-generates ticket & sends email</li>
         </ol>

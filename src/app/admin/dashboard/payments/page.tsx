@@ -6,8 +6,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface Payment {
   id: string;
   registration_id: string;
-  razorpay_order_id: string;
-  razorpay_payment_id: string | null;
+  utr_number?: string | null;
+  paytm_order_id?: string | null;
+  paytm_txn_id?: string | null;
+  razorpay_order_id?: string | null;
+  razorpay_payment_id?: string | null;
   amount: number;
   currency: string;
   status: string;
@@ -76,8 +79,7 @@ export default function PaymentsPage() {
                 <th className="text-left">#</th>
                 <th className="text-left">Student</th>
                 <th className="text-left">Registration ID</th>
-                <th className="text-left">Order ID</th>
-                <th className="text-left">Payment ID</th>
+                <th className="text-left">UTR / Transaction ID</th>
                 <th className="text-left">Amount</th>
                 <th className="text-left">Method</th>
                 <th className="text-left">Status</th>
@@ -86,9 +88,9 @@ export default function PaymentsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} className="text-center py-12 text-slate-500">Loading...</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-slate-500">Loading...</td></tr>
               ) : payments.length === 0 ? (
-                <tr><td colSpan={9} className="text-center py-12 text-slate-500">No payments found.</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-slate-500">No payments found.</td></tr>
               ) : (
                 payments.map((p, idx) => (
                   <tr key={p.id}>
@@ -97,9 +99,10 @@ export default function PaymentsPage() {
                       <div className="text-white font-medium">{p.registrations?.student_name || '-'}</div>
                       <div className="text-slate-500 text-xs">{p.registrations?.department}</div>
                     </td>
-                    <td className="font-mono text-xs text-purple-300">{p.registration_id}</td>
-                    <td className="font-mono text-xs text-slate-400">{p.razorpay_order_id?.slice(-12) || '-'}</td>
-                    <td className="font-mono text-xs text-slate-400">{p.razorpay_payment_id?.slice(-12) || '-'}</td>
+                    <td className="font-mono text-xs text-purple-300 font-semibold">{p.registration_id}</td>
+                    <td className="font-mono text-xs text-amber-300 font-semibold">
+                      {p.utr_number || p.paytm_txn_id || p.razorpay_payment_id || '-'}
+                    </td>
                     <td className="text-green-400 font-semibold">₹{p.amount / 100}</td>
                     <td className="text-slate-400 capitalize">{p.payment_method || '-'}</td>
                     <td>

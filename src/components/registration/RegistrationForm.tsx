@@ -102,7 +102,7 @@ export default function RegistrationForm({ settings }: RegistrationFormProps) {
               <Loader2 className="w-12 h-12 text-purple-400 spinner mb-4" />
               <p className="text-white font-semibold text-lg">
                 {step === 'submitting' && 'Creating your registration...'}
-                {step === 'payment' && 'Opening payment gateway...'}
+                {step === 'payment' && 'Redirecting to UPI payment...'}
                 {step === 'verifying' && 'Verifying your payment...'}
               </p>
               <p className="text-slate-400 text-sm mt-2">Please do not close this window.</p>
@@ -225,10 +225,10 @@ export default function RegistrationForm({ settings }: RegistrationFormProps) {
               </div>
               <div className="text-right text-xs text-slate-400">
                 <div className="flex items-center gap-1 justify-end text-green-400 font-semibold mb-0.5">
-                  <Shield className="w-3 h-3" /> 0% Transaction Fee
+                  <Shield className="w-3 h-3" /> 0% Gateway Fee
                 </div>
-                <div>Secure UPI Payment</div>
-                <div className="text-blue-400 font-semibold">via Paytm Business</div>
+                <div className="text-slate-300">Direct UPI Payment</div>
+                <div className="text-purple-300 font-medium">GPay • PhonePe • Paytm • BHIM</div>
               </div>
             </div>
 
