@@ -15,8 +15,8 @@ import {
   Info,
 } from 'lucide-react';
 
-const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || '9284650146-2@ibl';
-const UPI_NAME = process.env.NEXT_PUBLIC_UPI_NAME || 'Sarthak Varpe';
+const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || 'ganeshgadre@ybl';
+const UPI_NAME = process.env.NEXT_PUBLIC_UPI_NAME || 'Ganesh Gadre';
 const AMOUNT = '300';
 
 function PaymentPendingContent() {
