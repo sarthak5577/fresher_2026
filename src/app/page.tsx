@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import Navbar from '@/components/public/Navbar';
 import HeroSection from '@/components/public/HeroSection';
 import AboutSection from '@/components/public/AboutSection';
-import EventDetailsSection from '@/components/public/EventDetailsSection';
 import InstructionsSection from '@/components/public/InstructionsSection';
 import FAQSection from '@/components/public/FAQSection';
 import Footer from '@/components/public/Footer';
@@ -19,7 +18,6 @@ export default async function HomePage() {
       <Navbar />
       <HeroSection registrationOpen={settings.registration_open ?? true} />
       <AboutSection />
-      <EventDetailsSection settings={settings} />
       <InstructionsSection />
       <Suspense>
         <RegistrationForm settings={settings} />

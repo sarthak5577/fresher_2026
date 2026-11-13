@@ -7,7 +7,6 @@ import { Menu, X, GraduationCap } from 'lucide-react';
 const navItems = [
   { label: 'Home', href: '#home' },
   { label: 'About', href: '#about' },
-  { label: 'Event Details', href: '#event-details' },
   { label: 'Register', href: '#register' },
   { label: 'FAQs', href: '#faqs' },
   { label: 'Contact', href: '#contact' },
