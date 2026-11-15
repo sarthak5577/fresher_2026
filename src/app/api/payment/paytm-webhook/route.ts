@@ -212,6 +212,8 @@ async function processSuccessfulPayment(supabase: any, registrationId: string, p
       amount: 300,
       eventDate,
       eventVenue,
+      ticketToken,
+      qrCodeDataUrl,
       invoicePdf: Buffer.from(invoiceHTML),
       ticketPdf: Buffer.from(ticketHTML),
     });

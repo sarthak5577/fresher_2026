@@ -179,19 +179,9 @@ export async function POST(request: NextRequest) {
       // Non-fatal
     }
 
-    // 7. Dispatch confirmation email with PDF attachments via Resend
+    // 7. Dispatch confirmation email with PDF download links and attachments via Resend
     try {
-      const emailLog = await supabase
-        .from('email_logs')
-        .insert({
-          registration_id: registrationId,
-          email_type: 'confirmation',
-          delivery_status: 'pending',
-        })
-        .select()
-        .single();
-
-      const emailResult = await sendConfirmationEmail(registration.email, {
+      await sendConfirmationEmail(registration.email, {
         studentName: registration.student_name,
         registrationId: registration.registration_id,
         department: registration.department,
@@ -200,22 +190,13 @@ export async function POST(request: NextRequest) {
         amount: feeAmount,
         eventDate,
         eventVenue,
+        ticketToken,
+        qrCodeDataUrl,
         invoicePdf: Buffer.from(invoiceHTML),
         ticketPdf: Buffer.from(ticketHTML),
       });
-
-      if (emailLog?.data?.id) {
-        await supabase
-          .from('email_logs')
-          .update({
-            delivery_status: emailResult.success ? 'sent' : 'failed',
-            sent_at: emailResult.success ? new Date().toISOString() : null,
-            error_message: emailResult.error || null,
-          })
-          .eq('id', emailLog.data.id);
-      }
     } catch (emailErr) {
-      console.error('Email dispatch error:', emailErr);
+      console.error('Email dispatch error (non-fatal):', emailErr);
     }
 
     return NextResponse.json({

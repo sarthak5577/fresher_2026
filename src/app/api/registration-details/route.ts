@@ -69,6 +69,8 @@ export async function GET(request: NextRequest) {
       paymentId: resolvedPaymentId,
       amount: 300,
       paymentDate,
+      email: registration.email,
+      ticketToken: registration.ticket_token || '',
     });
   } catch (error: unknown) {
     console.error('Registration details error:', error);

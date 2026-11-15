@@ -13,17 +13,19 @@ import {
   Loader2,
   ArrowRight,
   Info,
+  Download,
+  AlertTriangle,
+  HelpCircle,
 } from 'lucide-react';
 
 const UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || 'ganeshgadre@ybl';
 const UPI_NAME = process.env.NEXT_PUBLIC_UPI_NAME || 'Ganesh Gadre';
-const AMOUNT = '300';
+const AMOUNT = '300.00';
 
 function PaymentPendingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const registrationId = searchParams.get('id') || '';
-  const orderId = searchParams.get('oid') || '';
 
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [utrNumber, setUtrNumber] = useState<string>('');
@@ -31,18 +33,32 @@ function PaymentPendingContent() {
   const [copied, setCopied] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [status, setStatus] = useState<'pending' | 'paid' | 'failed'>('pending');
+  const [showGuide, setShowGuide] = useState<boolean>(true);
 
-  const upiIntentUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(
+  // Clean, standard NPCI-compliant UPI URI
+  // Short clean transaction note avoids aggressive bank risk-engine filters
+  const standardUpiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(
     UPI_NAME
-  )}&am=${AMOUNT}&cu=INR&tn=${encodeURIComponent(
-    `Freshers2026-${registrationId}`
-  )}`;
+  )}&am=${AMOUNT}&cu=INR&tn=Freshers2026`;
 
-  // Generate QR code on load
+  // App-specific intents for smoother mobile redirection
+  const phonePeIntentUrl = `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(
+    UPI_NAME
+  )}&am=${AMOUNT}&cu=INR&tn=Freshers2026`;
+
+  const gPayIntentUrl = `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(
+    UPI_NAME
+  )}&am=${AMOUNT}&cu=INR&tn=Freshers2026`;
+
+  const paytmIntentUrl = `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(
+    UPI_NAME
+  )}&am=${AMOUNT}&cu=INR&tn=Freshers2026`;
+
+  // Generate high-resolution QR code on load
   useEffect(() => {
     if (!registrationId) return;
-    QRCode.toDataURL(upiIntentUrl, {
-      width: 280,
+    QRCode.toDataURL(standardUpiUrl, {
+      width: 400,
       margin: 2,
       color: {
         dark: '#0f0528',
@@ -51,7 +67,7 @@ function PaymentPendingContent() {
     })
       .then((url) => setQrDataUrl(url))
       .catch((err) => console.error('QR generation error:', err));
-  }, [registrationId, upiIntentUrl]);
+  }, [registrationId, standardUpiUrl]);
 
   // Periodic fallback check if status changes (e.g. approved by admin)
   const checkStatus = useCallback(async () => {
@@ -131,10 +147,10 @@ function PaymentPendingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0118] py-12 px-4 sm:px-6 flex items-center justify-center">
+    <div className="min-h-screen bg-[#0a0118] py-10 px-4 sm:px-6 flex items-center justify-center">
       <div className="max-w-xl w-full">
         {/* Main Card */}
-        <div className="glass rounded-3xl p-6 sm:p-8 border border-purple-900/50 bg-[#0f0528]/90 shadow-2xl relative">
+        <div className="glass rounded-3xl p-6 sm:p-8 border border-purple-900/50 bg-[#0f0528]/95 shadow-2xl relative">
           
           {/* Header */}
           <div className="text-center mb-6">
@@ -145,7 +161,7 @@ function PaymentPendingContent() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white">
-              Scan & Pay <span className="gradient-text">₹{AMOUNT}</span>
+              Scan & Pay <span className="gradient-text">₹300</span>
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm mt-1">
               JSCE Freshers 2026 Registration Fee
@@ -162,18 +178,18 @@ function PaymentPendingContent() {
             </div>
             <div className="sm:text-right">
               <div className="text-xs text-slate-400">Payable Amount</div>
-              <div className="text-green-400 font-bold text-lg">₹{AMOUNT}.00</div>
+              <div className="text-green-400 font-bold text-lg">₹300.00</div>
             </div>
           </div>
 
           {/* QR Code Section */}
-          <div className="flex flex-col items-center mb-6">
-            <div className="p-3 bg-white rounded-2xl shadow-xl border-4 border-purple-600/30">
+          <div className="flex flex-col items-center mb-5">
+            <div className="p-3 bg-white rounded-2xl shadow-2xl border-4 border-purple-600/40">
               {qrDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={qrDataUrl}
-                  alt="UPI QR Code"
+                  alt="UPI Payment QR Code"
                   className="w-56 h-56 sm:w-64 sm:h-64 object-contain rounded-xl"
                 />
               ) : (
@@ -183,49 +199,116 @@ function PaymentPendingContent() {
               )}
             </div>
 
-            <p className="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
-              <span>Scan with any UPI App:</span>
-              <span className="text-slate-200 font-medium">GPay • PhonePe • Paytm • BHIM</span>
-            </p>
+            {/* Quick Action Buttons: Save QR & Copy UPI */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 w-full">
+              {qrDataUrl && (
+                <a
+                  href={qrDataUrl}
+                  download={`Freshers2026-QR-${registrationId || 'pay'}.png`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-600/40 text-purple-200 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow"
+                >
+                  <Download className="w-4 h-4 text-purple-300" />
+                  Save QR to Gallery
+                </a>
+              )}
 
-            {/* Mobile Pay Button */}
-            <a
-              href={upiIntentUrl}
-              className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg hover:shadow-purple-500/25"
-            >
-              <Smartphone className="w-4 h-4" />
-              Pay via UPI App Directly
-            </a>
-
-            {/* Copy UPI ID */}
-            <div className="mt-3 flex items-center gap-2 text-xs">
-              <span className="text-slate-400">UPI ID:</span>
-              <code className="text-purple-300 font-mono bg-purple-900/30 px-2 py-1 rounded-md border border-purple-800/40">
-                {UPI_ID}
-              </code>
               <button
                 type="button"
                 onClick={copyToClipboard}
-                className="text-slate-400 hover:text-white p-1 rounded transition-colors"
-                title="Copy UPI ID"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-700/60 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl transition-all cursor-pointer"
               >
                 {copied ? (
-                  <Check className="w-3.5 h-3.5 text-green-400" />
+                  <>
+                    <Check className="w-4 h-4 text-green-400" />
+                    <span className="text-green-300">UPI ID Copied!</span>
+                  </>
                 ) : (
-                  <Copy className="w-3.5 h-3.5" />
+                  <>
+                    <Copy className="w-4 h-4 text-slate-400" />
+                    <span>Copy UPI ID ({UPI_ID})</span>
+                  </>
                 )}
               </button>
             </div>
+
+            {/* Direct Mobile UPI Links */}
+            <div className="mt-3 w-full">
+              <div className="text-[11px] text-slate-400 text-center mb-2">
+                Open directly in installed UPI App:
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <a
+                  href={gPayIntentUrl}
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-2 bg-[#1a1333] hover:bg-[#251b47] border border-purple-800/40 rounded-xl text-xs font-medium text-slate-200 transition-colors"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Google Pay</span>
+                </a>
+                <a
+                  href={phonePeIntentUrl}
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-2 bg-[#1a1333] hover:bg-[#251b47] border border-purple-800/40 rounded-xl text-xs font-medium text-slate-200 transition-colors"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-purple-400" />
+                  <span>PhonePe</span>
+                </a>
+                <a
+                  href={paytmIntentUrl}
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-2 bg-[#1a1333] hover:bg-[#251b47] border border-purple-800/40 rounded-xl text-xs font-medium text-slate-200 transition-colors"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Paytm</span>
+                </a>
+              </div>
+            </div>
           </div>
 
-          <div className="border-t border-purple-900/30 my-6" />
+          {/* Security Decline Helper Box */}
+          <div className="mb-6 rounded-2xl bg-amber-950/30 border border-amber-800/40 p-4 text-xs">
+            <div
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => setShowGuide(!showGuide)}
+            >
+              <div className="flex items-center gap-2 font-semibold text-amber-300">
+                <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <span>UPI App showing &quot;Declined for security reasons&quot;?</span>
+              </div>
+              <HelpCircle className="w-4 h-4 text-amber-400/80" />
+            </div>
+
+            {showGuide && (
+              <div className="mt-3 text-slate-300 space-y-2 border-t border-amber-900/40 pt-3">
+                <p className="text-slate-400">
+                  Bank security engines block some browser-initiated links for protection. Use either method below to pay 100% smoothly:
+                </p>
+                <div className="bg-[#120726] p-2.5 rounded-xl border border-purple-900/30 space-y-1">
+                  <div className="font-semibold text-purple-300">Method 1 — Scan from Gallery (Recommended):</div>
+                  <ol className="list-decimal list-inside space-y-0.5 text-slate-300">
+                    <li>Tap <strong className="text-white">&quot;Save QR to Gallery&quot;</strong> above</li>
+                    <li>Open <strong>PhonePe / GPay / Paytm</strong></li>
+                    <li>Tap the <strong>QR Scanner</strong> icon ➔ tap the <strong>Gallery/Image icon</strong> inside the scanner</li>
+                    <li>Select the saved QR to complete ₹300 payment</li>
+                  </ol>
+                </div>
+                <div className="bg-[#120726] p-2.5 rounded-xl border border-purple-900/30 space-y-1">
+                  <div className="font-semibold text-purple-300">Method 2 — Pay directly to UPI ID:</div>
+                  <ol className="list-decimal list-inside space-y-0.5 text-slate-300">
+                    <li>Copy UPI ID: <strong className="text-white font-mono">{UPI_ID}</strong></li>
+                    <li>In PhonePe/GPay, select <strong>&quot;To UPI ID / Number&quot;</strong></li>
+                    <li>Paste <code className="text-purple-300">{UPI_ID}</code> (Name: <strong>{UPI_NAME}</strong>) and pay ₹300</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-purple-900/30 my-5" />
 
           {/* UTR Submission Form */}
           <form onSubmit={handleUtrSubmit} className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
-                  Enter 12-Digit UTR / Transaction ID
+                  Step 2: Enter 12-Digit UTR / Transaction ID
                 </label>
                 <span className="text-xs text-purple-400 font-medium">Instant Verification</span>
               </div>
@@ -238,9 +321,9 @@ function PaymentPendingContent() {
                 className="w-full bg-[#0d0220] border border-purple-900/50 focus:border-purple-500 rounded-xl px-4 py-3.5 text-white font-mono placeholder-slate-600 text-base tracking-widest text-center focus:outline-none focus:ring-1 focus:ring-purple-500/30 transition-all uppercase"
                 disabled={verifying || status === 'paid'}
               />
-              <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
-                <Info className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                Found in your GPay / PhonePe / Paytm receipt as &ldquo;UPI Ref No.&rdquo; or &ldquo;UTR&rdquo;.
+              <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
+                <Info className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                Found in your payment receipt as &ldquo;UPI Ref No.&rdquo;, &ldquo;UTR&rdquo;, or &ldquo;Transaction ID&rdquo;.
               </p>
             </div>
 
@@ -261,7 +344,7 @@ function PaymentPendingContent() {
             <button
               type="submit"
               disabled={verifying || status === 'paid' || utrNumber.length < 10}
-              className="w-full py-3.5 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-green-500/25 flex items-center justify-center gap-2 text-sm sm:text-base"
+              className="w-full py-3.5 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-green-500/25 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer disabled:cursor-not-allowed"
             >
               {verifying ? (
                 <>

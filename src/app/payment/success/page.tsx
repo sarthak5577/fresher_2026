@@ -16,6 +16,8 @@ interface SuccessData {
   paymentId: string;
   amount: number;
   paymentDate: string;
+  email?: string;
+  ticketToken?: string;
 }
 
 function PaymentSuccessContent() {
@@ -27,6 +29,13 @@ function PaymentSuccessContent() {
   const [data, setData] = useState<SuccessData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [resending, setResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState<{ type: 'idle' | 'success' | 'error'; message: string }>({
+    type: 'idle',
+    message: '',
+  });
+  const [showEditEmail, setShowEditEmail] = useState(false);
+  const [customEmail, setCustomEmail] = useState('');
 
   useEffect(() => {
     if (!registrationId) {
@@ -48,6 +57,9 @@ function PaymentSuccessContent() {
           setError(json.error || 'Failed to load registration details.');
         } else {
           setData(json);
+          if (json.email) {
+            setCustomEmail(json.email);
+          }
         }
       } catch {
         setError('Failed to load. Please save your Registration ID and Payment ID.');
@@ -60,8 +72,47 @@ function PaymentSuccessContent() {
   }, [registrationId, paymentId, token]);
 
   const downloadFile = (type: 'invoice' | 'ticket') => {
-    const url = `/api/${type}/${registrationId}?token=${token}`;
+    const activeToken = token || data?.ticketToken || '';
+    const url = `/api/${type}/${registrationId}?token=${activeToken}`;
     window.open(url, '_blank');
+  };
+
+  const handleResendEmail = async () => {
+    if (!registrationId || resending) return;
+    setResending(true);
+    setResendStatus({ type: 'idle', message: '' });
+
+    try {
+      const res = await fetch('/api/payment/resend-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          registrationId,
+          email: customEmail.trim() || undefined,
+        }),
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        setResendStatus({
+          type: 'error',
+          message: resData.error || 'Failed to resend email. Please try again in a few moments.',
+        });
+      } else {
+        setResendStatus({
+          type: 'success',
+          message: `Ticket & invoice email sent successfully to ${resData.email || customEmail || 'your email'}! Please check your Inbox and Spam folder.`,
+        });
+        setShowEditEmail(false);
+      }
+    } catch {
+      setResendStatus({
+        type: 'error',
+        message: 'Network error. Please try again.',
+      });
+    } finally {
+      setResending(false);
+    }
   };
 
   if (loading) {
@@ -156,23 +207,95 @@ function PaymentSuccessContent() {
                 </button>
               </div>
 
-              {/* Email note */}
-              <div className="flex items-center gap-3 bg-blue-900/20 border border-blue-700/30 rounded-xl p-4 mb-6">
-                <Mail className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                <p className="text-slate-400 text-sm">
-                  Your invoice and QR entry ticket have been emailed to{' '}
-                  <span className="text-blue-400">your registered email address</span>.
-                </p>
+              {/* Email note and Resend section */}
+              <div className="bg-blue-950/30 border border-blue-800/40 rounded-2xl p-5 mb-6">
+                <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-900/40 rounded-lg">
+                      <Mail className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                    </div>
+                    <div>
+                      <div className="text-white text-sm font-semibold">
+                        Ticket & Invoice Emailed
+                      </div>
+                      <p className="text-slate-400 text-xs">
+                        Sent to{' '}
+                        <span className="text-blue-300 font-medium">
+                          {data.email || 'your registered email'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditEmail(!showEditEmail)}
+                      className="text-xs text-slate-400 hover:text-white underline cursor-pointer"
+                    >
+                      {showEditEmail ? 'Cancel' : 'Change email?'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResendEmail}
+                      disabled={resending}
+                      className="px-3.5 py-1.5 bg-blue-600/40 hover:bg-blue-600/60 border border-blue-500/40 text-blue-200 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      {resending ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Resend Email'
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Optional edit email input */}
+                {showEditEmail && (
+                  <div className="mt-4 pt-3 border-t border-blue-900/40 flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="email"
+                      value={customEmail}
+                      onChange={(e) => setCustomEmail(e.target.value)}
+                      placeholder="Enter correct email address"
+                      className="flex-1 bg-[#0b031b] border border-blue-800/50 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleResendEmail}
+                      disabled={resending || !customEmail.includes('@')}
+                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition-colors"
+                    >
+                      Send to New Email
+                    </button>
+                  </div>
+                )}
+
+                {/* Resend Status Banner */}
+                {resendStatus.message && (
+                  <div
+                    className={`mt-3 p-2.5 rounded-lg text-xs font-medium ${
+                      resendStatus.type === 'success'
+                        ? 'bg-green-950/50 border border-green-800/40 text-green-300'
+                        : 'bg-red-950/50 border border-red-800/40 text-red-300'
+                    }`}
+                  >
+                    {resendStatus.message}
+                  </div>
+                )}
               </div>
 
               {/* Important note */}
               <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-xl p-4 mb-6">
-                <p className="text-yellow-300 text-sm font-semibold mb-1">📋 Important</p>
+                <p className="text-yellow-300 text-sm font-semibold mb-1">📋 Important Instructions</p>
                 <ul className="text-slate-400 text-sm space-y-1 list-disc list-inside">
-                  <li>Keep your QR entry ticket ready for the event</li>
-                  <li>The QR code will be scanned once at entry</li>
-                  <li>Bring your College ID card for verification</li>
-                  <li>Save your Registration ID: <strong className="text-white">{data.registrationId}</strong></li>
+                  <li>You can tap <strong>Download Entry Ticket</strong> and <strong>Download Invoice</strong> anytime above to print or save as PDF</li>
+                  <li>The QR entry ticket will be scanned at the venue entrance</li>
+                  <li>Bring your College ID card for entry verification</li>
+                  <li>Your Registration ID: <strong className="text-white font-mono">{data.registrationId}</strong></li>
                 </ul>
               </div>
             </div>

@@ -160,6 +160,8 @@ export async function POST(request: NextRequest) {
         amount: 300,
         eventDate,
         eventVenue,
+        ticketToken,
+        qrCodeDataUrl,
         invoicePdf: Buffer.from(invoiceHTML),
         ticketPdf: Buffer.from(ticketHTML),
       });
